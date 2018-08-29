@@ -1,0 +1,12 @@
+.card {
+    box-shadow: 0px 0px 20px 4px rgba(0, 0, 0, 0.14);
+    padding:20px;
+}
+
+.mar-r-30{
+    margin-right: 30px;
+}
+
+.mar-l-10{
+    margin-left: 10px;
+}
