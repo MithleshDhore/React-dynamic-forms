@@ -1,6 +1,5 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
-import validators from './validators';
 import './form.css';
 
 export default class DynamicForm extends React.Component {
