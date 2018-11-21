@@ -17,7 +17,7 @@ class App extends Component {
   }
 
   onSubmit = (model) => {
-    console.log("form submit model data :"+ model);
+    console.log("form submit model data :" + model);
     let data = [];
     if (model.id) {
       data = this.state.data.filter((d) => {
@@ -27,7 +27,7 @@ class App extends Component {
       model.id = +new Date();
       data = this.state.data.slice();
     }
-    
+
     this.setState({
       data: [model, ...data]
     });
@@ -44,32 +44,33 @@ class App extends Component {
   }
 
   render() {
-      let data = this.state.data.map((d) => {
-        return (
-          <tr key={d.id}>
-              <td>{d.name}</td>
-              <td>{d.age}</td>
-              <td>{d.qualification}</td>
-              <td>{d.gender}</td>
-              <td>{d.rating}</td>
-              <td>{d.city}</td>
-              <td>{d.skills.join(",")}</td>
-              <td><button className="btn btn-default" onClick={()=>{this.onEdit(d.id)}}>edit</button></td>
-          </tr>
-        );
-      });
-    
+    let data = this.state.data.map((d) => {
+      return (
+        <tr key={d.id}>
+          <td>{d.name}</td>
+          <td>{d.age}</td>
+          <td>{d.qualification}</td>
+          <td>{d.gender}</td>
+          <td>{d.rating}</td>
+          <td>{d.city}</td>
+          {d.skills?<td>{d.skills.join(",")}</td>:''}
+          <td><button className="btn btn-default" onClick={() => { this.onEdit(d.id) }}>edit</button></td>
+        </tr>
+      );
+    });
+
     return (
       <div className="App">
-        <div className="col-xs-6">
+        <div className="col-xs-2"></div>
+        <div className="col-xs-3">
           <DynamicForm className=""
-            title = "Registration Form"
-            defaultValues = {this.state.current}
-            model= {MODEL}
-            onSubmit = {(model) => {this.onSubmit(model)}} 
+            title="Registration Form"
+            defaultValues={this.state.current}
+            model={MODEL}
+            onSubmit={(model) => { this.onSubmit(model) }}
           />
         </div>
-        <div className="col-xs-6">
+        <div className="col-xs-5">
           <h3>Form data</h3>
           <div className="card">
             <table className="table table-bordered table-hover">
@@ -78,13 +79,14 @@ class App extends Component {
           </div>
           <h3 className="mar-t-50">From data</h3>
           <div className="card">
-          {JSON.stringify(this.state.current)}
+            {JSON.stringify(this.state.current)}
           </div>
           <h3 className="mar-t-50">From metadata</h3>
           <div className="card">
-          {JSON.stringify(MODEL)}
+            {JSON.stringify(MODEL)}
           </div>
         </div>
+        <div className="col-xs-1"></div>
       </div>
     );
   }
