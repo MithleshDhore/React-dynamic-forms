@@ -17,7 +17,6 @@ class App extends Component {
   }
 
   onSubmit = (model) => {
-    console.log("form submit model data :" + model);
     let data = [];
     if (model.id) {
       data = this.state.data.filter((d) => {
@@ -27,7 +26,6 @@ class App extends Component {
       model.id = +new Date();
       data = this.state.data.slice();
     }
-
     this.setState({
       data: [model, ...data]
     });
@@ -62,9 +60,10 @@ class App extends Component {
     return (
       <div className="App">
         <div className="col-xs-2"></div>
-        <div className="col-xs-3">
-          <DynamicForm className=""
-            title="Registration Form"
+        <div className="col-xs-3 mar-t-50">
+          <DynamicForm 
+            className="card"
+            formTitle="Health & Behaviour"
             defaultValues={this.state.current}
             model={MODEL}
             onSubmit={(model) => { this.onSubmit(model) }}
@@ -79,7 +78,7 @@ class App extends Component {
           </div>
           <h3 className="mar-t-50">From data</h3>
           <div className="card">
-            {JSON.stringify(this.state.current)}
+            {JSON.stringify(this.state.data)}
           </div>
           <h3 className="mar-t-50">From metadata</h3>
           <div className="card">
