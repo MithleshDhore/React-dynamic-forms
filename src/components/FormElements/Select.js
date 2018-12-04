@@ -12,14 +12,14 @@ const Select = props => {
         className={props.className}
         value={props.setvalue}
         onChange={e => {
-          props.onChange(e, props.modalKey);
+          props.onChange(e, props.modalKey, props.answerType);
         }}
       >
         <option value="" />
         {props.options.map(op => {
           return (
             <option key={op.key} value={op.value}>
-              {op.value}
+              {op.label}
             </option>
           );
         })}
@@ -32,7 +32,7 @@ Select.propTypes = {
   name: PropTypes.string,
   type: PropTypes.string,
   value: PropTypes.string,
-  onChange: PropTypes.funcion,
+  onChange: PropTypes.func,
   label: PropTypes.string,
   options: PropTypes.array
 };

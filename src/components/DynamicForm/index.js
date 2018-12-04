@@ -45,37 +45,77 @@ export default class DynamicForm extends React.Component {
             this.props.onSubmit(this.state);
         }
     };
-    
+
     onReset = e => {
         e.preventDefault();
     };
 
-    onChange = (e, key, type = "single") => {
-        // console.log(`${key} changed ${e.target.value} type ${type}`);
-        if (type === "single") {
-            this.setState({
-                [key]: e.target.value
-            });
-        } else {
-            let found = this.state[key]
-                ? this.state[key].find(d => d === e.target.value)
-                : false;
+    onChange = (e, key, type) => {
+        let groupKey = key.split(":")[0];
+        let questionKey = key.split(":")[1] || key;
+        if (groupKey !== questionKey) {
+            if (!this.state[groupKey] || !Object.keys(this.state[groupKey]) || Object.keys(this.state[groupKey]).length === 0) {
+                this.state[groupKey] = {};
+            }
+            if (type === "single") {
+                this.setState({
+                    [groupKey]: {
+                        ...this.state[groupKey], [questionKey]: e.target.value
+                    }
+                })
+            }
+            else {
+                let found = this.state[groupKey][questionKey]
+                    ? this.state[groupKey][questionKey].find(d => d === e.target.value)
+                    : false;
 
-            if (found) {
-                let data = this.state[key].filter(d => {
-                    return d !== found;
-                });
-                this.setState({
-                    [key]: data
-                });
-            } else {
-                // console.log(this.state);
-                this.setState({
-                    [key]: (this.state[key] &&
-                        this.state[key].concat([e.target.value])) || [e.target.value]
-                });
+                if (found) {
+                    let data = this.state[groupKey][questionKey].filter(d => {
+                        return d !== found;
+                    });
+                    this.setState({
+                        [groupKey]: {
+                            ...this.state[groupKey], [questionKey]: data
+                        }
+                    });
+                } else {
+                    this.setState({
+                        [groupKey]: {
+                            ...this.state[groupKey],
+                            [questionKey]: (!isEmpty(this.state[groupKey][questionKey]) &&
+                                this.state[groupKey][questionKey].concat([e.target.value])) || [e.target.value]
+                        }
+                    });
+                }
             }
         }
+        else {
+            if (type === "single") {
+                this.setState({
+                    [key]: e.target.value
+                });
+            } else {
+                let found = this.state[key]
+                    ? this.state[key].find(d => d === e.target.value)
+                    : false;
+
+                if (found) {
+                    let data = this.state[key].filter(d => {
+                        return d !== found;
+                    });
+                    this.setState({
+                        [key]: data
+                    });
+                } else {
+                    this.setState({
+                        [key]: (this.state[key] &&
+                            this.state[key].concat([e.target.value])) || [e.target.value]
+                    });
+                }
+            }
+        }
+
+        console.log("current state : ", this.state);
     };
 
     validateCondition = (conditions, visible) => {
@@ -125,111 +165,99 @@ export default class DynamicForm extends React.Component {
 
     renderForm = () => {
         let model = this.props.model;
-        model.sort((a, b) => a.rank - b.rank);
-        // let defaultValues = this.props.defaultValues;
+        // this.sort(model);
 
-        let formUI = model.map(m => {
+        let formUI = this.createFormElement(model);
+        console.log("formUI :", formUI);
+        return formUI;
+    };
+
+    sort = (model) => {
+        model.sort((a, b) => a.rank - b.rank);
+    }
+
+    getValue = (key, defaultValue) => {
+        let value;
+        if (key.includes(":")) {
+            let groupKey = key.split(":")[0];
+            let questionKey = key.split(":")[1] || key;
+            if (!isEmpty(this.state[groupKey])) {
+                if (typeof this.state[groupKey] === 'object') {
+                    value = this.state[groupKey][questionKey]
+                }
+                else {
+                    value = this.state[groupKey].questionKey;
+                }
+            }
+        }
+        else {
+            value = this.state[key] || defaultValue;
+        }
+        return value;
+    }
+
+    createFormElement(model) {
+        this.sort(model);
+        let questionSet = [];
+        for (let m of model) {
             let key = m.key;
             let type = m.type || "text";
-            let props = m.props || {};
             let name = m.name;
-            // let value = m.value;
             let conditions = m.conditions || {};
             let visible = m.visible;
+            let answerType = m.answerType || 'single';
             let input;
-
             //for textarea
             let rows = m.rows;
             let cols = m.cols;
-
-            // let target = key;
-            // value = this.state[target];
-
-            let defaultValue = this.props.defaultValues[m.key] || "";
-            let value = this.state[key] || defaultValue;
+            // let target = key; value = this.state[target];
+            let defaultValue;
+            if (this.props.defaultValues) {
+                defaultValue = this.props.defaultValues[m.key] || "";
+            }
+            let value = this.getValue(key, defaultValue);
 
             if (!isEmpty(conditions)) {
                 visible = this.validateCondition(conditions, visible);
             }
-
             switch (type) {
                 case "textarea":
-                    input = (
-                        <TextArea
-                            className="form-control"
-                            modalKey={key}
-                            name={name}
-                            value={value}
-                            rows={rows}
-                            cols={cols}
-                            label={m.label}
-                            onChange={this.onChange}
-                        />
-                    );
+                    input = (<TextArea className="form-control" modalKey={key} name={name} value={value} rows={rows} cols={cols} label={m.label} answerType={answerType} onChange={this.onChange} />);
                     break;
                 case "radio":
-                    input = (
-                        <Radio
-                            options={m.options}
-                            type={type}
-                            onChange={this.onChange}
-                            setvalue={value}
-                            modalKey={key}
-                            label={m.label}
-                        />
-                    );
+                    input = (<Radio className="" options={m.options} type={type} onChange={this.onChange} setvalue={value} modalKey={key} label={m.label} answerType={answerType} />);
                     break;
                 case "select":
-                    input = (
-                        <Select
-                            className="form-control"
-                            setvalue={value}
-                            onChange={this.onChange}
-                            options={m.options}
-                            modalKey={m.key}
-                            label={m.label}
-                        />
-                    );
+                    input = (<Select className="form-control" setvalue={value} onChange={this.onChange} options={m.options} modalKey={m.key} label={m.label} answerType={answerType} />);
                     break;
                 case "checkbox":
-                    input = (
-                        <CheckBox
-                            modalKey={m.key}
-                            label={m.label}
-                            options={m.options}
-                            type={type}
-                            setvalue={value}
-                            onChange={this.onChange}
-                        />
-                    );
+                    input = (<CheckBox className="" modalKey={m.key} label={m.label} options={m.options} type={type} setvalue={value} answerType={answerType} onChange={this.onChange} />);
+                    break;
+                case "group":
+                    // let originalQuestionSet = questionSet.slice();
+                    let newQuestionSet = this.createFormElement(m.fields);
+                    // questionSet = originalQuestionSet.concat(newQuestionSet);
+                    // this.state[m.key] = {};
+                    input = (<div id={m.key} group={m.key}><h4>{m.label}</h4>
+                        {newQuestionSet}
+                    </div>);
                     break;
                 default:
-                    input = (
-                        <Input
-                            className="form-control"
-                            type={type}
-                            modalKey={key}
-                            name={name}
-                            value={value}
-                            label={m.label}
-                            onChange={this.onChange}
-                        />
-                    );
+                    input = (<Input className="form-control" type={type} modalKey={key} name={name} value={value} label={m.label} onChange={this.onChange} answerType={answerType} />);
             }
 
             if (visible) {
-                return (
-                    <div key={"g" + key} className="form-group">
-                        {input}
-                    </div>
-                );
-            } else {
-                this.state[key] = "";
-                return "";
+                questionSet.push(<div key={"g" + key} className="form-group">
+                    {input}
+                </div>);
             }
-        });
-        return formUI;
-    };
+            else {
+                this.state[key] = "";
+                questionSet.push("");
+            }
+        };
+        return questionSet;
+    }
 
     render() {
         let formTitle = this.props.formTitle || "Dynamic Form";
@@ -239,10 +267,12 @@ export default class DynamicForm extends React.Component {
         return (
             <div className={this.props.className}>
                 <h3 className="form-title">{formTitle}</h3>
-                <form className="">
+                <form className="" onSubmit={e => {
+                    this.onSubmit(e);
+                }}>
                     {this.renderForm()}
                     <div className="">
-                        <button className="btn btn-primary" onClick={this.onSubmit}>{primaryButtonLabel}</button>
+                        <button className="btn btn-primary" type="submit">{primaryButtonLabel}</button>
                         <button className="btn btn-default" onClick={this.onReset}>{secondaryButtonLabel}</button>
                     </div>
                 </form>

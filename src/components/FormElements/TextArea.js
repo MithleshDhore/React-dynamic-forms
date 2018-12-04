@@ -15,7 +15,7 @@ const TextArea = props => {
         rows={props.rows}
         cols={props.cols}
         onChange={e => {
-          props.onChange(e, props.modalKey);
+          props.onChange(e, props.modalKey, props.answerType);
         }}
       />
     </React.Fragment>
@@ -27,8 +27,8 @@ TextArea.propTypes = {
   key: PropTypes.string,
   type: PropTypes.string,
   value: PropTypes.string,
-  onChange: PropTypes.funcion,
-  label: PropTypes.label
+  onChange: PropTypes.func,
+  label: PropTypes.string
 };
 
 export default TextArea;

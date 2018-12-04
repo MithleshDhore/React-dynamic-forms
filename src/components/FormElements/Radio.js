@@ -8,27 +8,25 @@ const Radio = props => {
       <label key={"l" + props.key} htmlFor={props.key}>
         {props.label}
       </label>
-      <div className="form-group-radio">
-        {props.options.map(o => {
-          return (
-            <React.Fragment key={"fr " + o.key}>
-              <input
-                className={props.className}
-                type={props.type}
-                key={o.key}
-                checked={o.value === props.setvalue}
-                value={o.value}
-                onChange={e => {
-                  props.onChange(e, props.modalKey);
-                }}
-              />
-              <label className="radio-inline mar-r-30" key={"ll" + o.key}>
-                {o.label}
-              </label>
-            </React.Fragment>
-          );
-        })}
-      </div>
+      {props.options.map(o => {
+        return (
+          <div className={props.className} key={"fr " + o.key}>
+            <input
+              id={o.key}
+              type={props.type}
+              key={o.key}
+              checked={o.value === props.setvalue}
+              value={o.value}
+              onChange={e => {
+                props.onChange(e, props.modalKey, props.answerType);
+              }}
+            />
+            <label htmlFor={o.key} key={"ll" + o.key}>
+              {o.label}
+            </label>
+          </div>
+        );
+      })}
     </React.Fragment>
   );
 };
@@ -37,7 +35,7 @@ Radio.propTypes = {
   name: PropTypes.string,
   type: PropTypes.string,
   value: PropTypes.string,
-  onChange: PropTypes.funcion,
+  onChange: PropTypes.func,
   label: PropTypes.string
 };
 export default Radio;
